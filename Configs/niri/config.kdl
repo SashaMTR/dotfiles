@@ -192,6 +192,7 @@ binds {
   Mod+Return       { spawn "kitty"; }
   Mod+B            { spawn "librewolf"; }
   Mod+M            { spawn "Telegram"; }
+  Mod+A            { spawn "fractal"; }
   Mod+Z            { spawn "localsend"; }
   Mod+E            { spawn-sh "kitty -e yazi"; }
   Mod+Shift+B      { spawn-sh "kitty -e bluetui"; }

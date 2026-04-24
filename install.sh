@@ -130,6 +130,11 @@ AUR_PKGS=(
     bluetui                # bluetooth TUI
     ttf-google-sans        # Google Sans Flex (waybar/rofi font)
     ncdu                   # disk usage TUI (yazi on-click)
+    librewolf              # browser (Mod+B)
+    telegram-desktop       # messaging (Mod+M)
+    fractal                # Matrix client (Mod+F)
+    localsend-bin          # local file sharing (Mod+Z)
+    cmus                   # music player (Mod+X)
 )
 
 install_pikaur() {
