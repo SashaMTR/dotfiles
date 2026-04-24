@@ -1,0 +1,146 @@
+* {
+    font-family: Google Sans Flex;
+    font-size: 16px;
+    padding: 0px 2px;
+}
+
+window#waybar {
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    border-radius: 0px;
+    margin: 0px;
+    padding: 0px;
+}
+
+/* ── Workspaces ────────────────────────────────────────────────────────────── */
+
+#workspaces button {
+    color: white;
+    border-radius: 24px;
+}
+
+#workspaces button.active {
+    color: white;
+    border-radius: 24px;
+    transition: all 0.2s ease-in-out;
+}
+
+#workspaces button:hover {
+    color: black;
+}
+
+/* ── Tooltip ───────────────────────────────────────────────────────────────── */
+
+tooltip {
+    border-radius: 32px;
+    transition: all 0.2s ease-in-out;
+}
+
+tooltip label {
+    color: white;
+    padding: 12px 20px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* ── All modules (shared base) ─────────────────────────────────────────────── */
+
+#workspaces,
+#temperature,
+#temperature.warning,
+#temperature.critical,
+#battery,
+#battery.warning:not(.charging),
+#battery.critical:not(.charging),
+#battery.charging,
+#battery.plugged,
+#battery.full,
+#cpu,
+#memory,
+#disk,
+#clock,
+#network,
+#network.disconnected,
+#pulseaudio,
+#pulseaudio.muted,
+#backlight,
+#custom-logo,
+#custom-power,
+#custom-mpris {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 32px;
+    padding: 1px 12px 0px 12px;
+    margin: 4px 0px;
+    transition: all 0.2s ease-in-out;
+}
+
+#workspaces {
+    padding: 0px 4px;
+}
+
+#custom-power {
+    padding: 1px 16px 0px 12px;
+}
+
+/* ── Hover ─────────────────────────────────────────────────────────────────── */
+
+#backlight:hover,
+#pulseaudio:hover {
+    background-color: #5962ff;
+    transition: all 0.2s ease-in-out;
+}
+
+/* ── Battery states ────────────────────────────────────────────────────────── */
+
+#battery.charging,
+#battery.plugged {
+    background-color: #00aa01;
+}
+
+#battery.full {
+    background-color: #5962ff;
+}
+
+#battery.warning:not(.charging) {
+    background-color: #FF7300;
+}
+
+#battery.critical:not(.charging) {
+    background-color: #FF0000;
+    animation-name: blink;
+    animation-duration: 1.0s;
+    animation-timing-function: steps(20);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/* ── Temperature states ────────────────────────────────────────────────────── */
+
+#temperature.warning {
+    background-color: #FF7300;
+}
+
+#temperature.critical {
+    background-color: #FF0000;
+    animation-name: blink;
+    animation-duration: 1.0s;
+    animation-timing-function: steps(20);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/* ── Network / Audio error states ──────────────────────────────────────────── */
+
+#network.disconnected,
+#pulseaudio.muted {
+    background-color: #f2000e;
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+
+@keyframes blink {
+    to {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+}

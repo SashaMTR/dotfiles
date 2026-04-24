@@ -1,0 +1,527 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// niri — config.kdl
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Misc ──────────────────────────────────────────────────────────────────────
+
+prefer-no-csd
+
+hotkey-overlay {
+  skip-at-startup
+}
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// ── Output ────────────────────────────────────────────────────────────────────
+
+output "eDP-1" {
+  mode "1920x1080@60.002"
+  scale 1.0
+  position x=0 y=0
+  focus-at-startup
+  variable-refresh-rate
+}
+
+// ── Input ─────────────────────────────────────────────────────────────────────
+
+input {
+  keyboard {
+    repeat-rate 60
+    repeat-delay 200
+  }
+
+  touchpad {
+    tap
+    natural-scroll
+    accel-speed 1.0
+    accel-profile "adaptive"
+    scroll-factor 3.0
+    scroll-method "two-finger"
+  }
+
+  mouse {
+    accel-speed 1.0
+    accel-profile "adaptive"
+    scroll-factor 3.0
+  }
+
+  focus-follows-mouse max-scroll-amount="10%"
+}
+
+// ── Cursor ────────────────────────────────────────────────────────────────────
+
+cursor {
+  xcursor-theme "Bibata-Modern-Ice"
+  xcursor-size 24
+  hide-when-typing
+  hide-after-inactive-ms 3000
+}
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+layout {
+  gaps 10
+  center-focused-column "never"
+
+  preset-column-widths {
+    proportion 0.33333
+    proportion 0.5
+    proportion 0.66667
+  }
+
+  default-column-width { proportion 0.5; }
+
+  focus-ring {
+    off
+    width 4
+    active-color "#7fc8ff"
+    inactive-color "#505050"
+  }
+
+  border {
+    off
+    width 4
+    active-color "#ffc87f"
+    inactive-color "#505050"
+    urgent-color "#9b0000"
+  }
+
+  shadow {
+    off
+    softness 30
+    spread 5
+    offset x=0 y=5
+    color "#0007"
+  }
+
+  struts {}
+}
+
+// ── Overview ──────────────────────────────────────────────────────────────────
+
+overview {
+  zoom 0.40
+  backdrop-color "#ffffff"
+
+  workspace-shadow {
+    softness 200
+    spread 10
+    offset x=0 y=0
+    color "#000000"
+  }
+}
+
+// ── Blur (global params) ──────────────────────────────────────────────────────
+
+blur {
+  passes 3
+  offset 6
+  noise 0.0
+  saturation 1.4
+}
+
+// ── Window & Layer rules ──────────────────────────────────────────────────────
+
+window-rule {
+  geometry-corner-radius 24
+  clip-to-geometry true
+}
+
+window-rule {
+  match app-id="^kitty$"
+  background-effect {
+    blur true
+  }
+}
+
+window-rule {
+  match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+  match app-id="librewolf"   title="^Picture-in-Picture$"
+  open-floating true
+  open-focused false
+  default-floating-position x=32 y=32 relative-to="bottom-right"
+  default-column-width { proportion 0.25; }
+  default-window-height { proportion 0.25; }
+}
+
+layer-rule {
+  match namespace="^rofi$"
+  geometry-corner-radius 50 50 0 0
+  background-effect {
+    blur true
+  }
+}
+
+layer-rule {
+  match namespace="^waybar$"
+  background-effect {
+    blur true
+  }
+}
+
+layer-rule {
+  match namespace="^mako$"
+  background-effect {
+    blur true
+  }
+}
+
+layer-rule {
+  match namespace="^logout_dialog$"
+  background-effect {
+    blur true
+  }
+}
+
+// ── Autostart ─────────────────────────────────────────────────────────────────
+
+spawn-sh-at-startup "waybar &"
+spawn-at-startup "swww-daemon"
+spawn-sh-at-startup "bash $HOME/.config/Scripts/wallpaper.sh"
+spawn-at-startup "kitty"
+spawn-at-startup "kdeconnect-indicator"
+spawn-at-startup "mako"
+spawn-sh-at-startup "wl-paste --type text  --watch cliphist store"
+spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
+spawn-sh-at-startup "swayidle -w timeout 300 'systemctl suspend' before-sleep 'hyprlock'"
+
+// ── Binds ─────────────────────────────────────────────────────────────────────
+
+binds {
+  // Apps
+  Mod+Return       { spawn "kitty"; }
+  Mod+B            { spawn "librewolf"; }
+  Mod+M            { spawn "Telegram"; }
+  Mod+Z            { spawn "localsend"; }
+  Mod+E            { spawn-sh "kitty -e yazi"; }
+  Mod+Shift+B      { spawn-sh "kitty -e bluetui"; }
+  Mod+N            { spawn-sh "kitty -e nmtui"; }
+  Mod+X            { spawn-sh "kitty -e cmus"; }
+
+  // Launchers / UI
+  Mod+space        { spawn-sh "pkill rofi || rofi -show drun"; }
+  Mod+C            { spawn-sh "pkill rofi || cliphist list | rofi -dmenu -display-columns 2 -theme ~/.config/rofi/clipboard.rasi | cliphist decode | wl-copy"; }
+  Mod+P            { spawn-sh "pkill wlogout || wlogout"; }
+  Mod+R            { spawn-sh "pkill waybar || waybar &"; }
+  Mod+W repeat=false { spawn-sh "bash $HOME/.config/Scripts/wallpaper.sh"; }
+
+  // Screenshots
+  Mod+Ctrl+R       { spawn-sh "bash $HOME/.config/Scripts/screenshot.sh area"; }
+  Mod+Ctrl+S       { spawn-sh "bash $HOME/.config/Scripts/screenshot.sh full"; }
+  Mod+Print        { screenshot; }
+  Print            { screenshot-screen; }
+  Mod+Ctrl+Print   { screenshot-window; }
+
+  // Lock / Power
+  Alt+L            { spawn-sh "bash ~/.config/Scripts/lockscreen.sh"; }
+  Alt+S            { spawn-sh "systemctl suspend; bash ~/.config/Scripts/lockscreen.sh"; }
+  Alt+R            { spawn-sh "systemctl reboot"; }
+  Alt+O            { spawn-sh "systemctl poweroff"; }
+
+  // Clipboard
+  Mod+delete       { spawn-sh "cliphist wipe"; }
+
+  // Media
+  XF86AudioRaiseVolume  allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.2"; }
+  XF86AudioLowerVolume  allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
+  XF86AudioMute         allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+  XF86AudioMicMute      allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+  XF86AudioPlay         allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+  XF86AudioStop         allow-when-locked=true { spawn-sh "playerctl stop"; }
+  XF86AudioPrev         allow-when-locked=true { spawn-sh "playerctl previous"; }
+  XF86AudioNext         allow-when-locked=true { spawn-sh "playerctl next"; }
+  XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+  XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+
+  // Media fallback (laptop fn keys)
+  Alt+B allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.2"; }
+  Alt+V allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
+  Alt+X allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+  Alt+C allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+  Alt+M allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+  Alt+N allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+
+  // WM — windows
+  Mod+Q repeat=true    { close-window; }
+  Mod+V                { toggle-window-floating; }
+  Mod+Shift+V          { switch-focus-between-floating-and-tiling; }
+  Mod+O repeat=false   { toggle-overview; }
+  Mod+ctrl+E           { quit skip-confirmation=true; }
+
+  // WM — focus
+  Mod+H     { focus-column-left; }
+  Mod+J     { focus-window-down; }
+  Mod+K     { focus-window-up; }
+  Mod+L     { focus-column-right; }
+  Mod+Left  { focus-column-left; }
+  Mod+Down  { focus-window-down; }
+  Mod+Up    { focus-window-up; }
+  Mod+Right { focus-column-right; }
+  Mod+U     { focus-workspace-up; }
+  Mod+I     { focus-workspace-down; }
+
+  // WM — move
+  Mod+Shift+H     { move-column-left; }
+  Mod+Shift+J     { move-window-down; }
+  Mod+Shift+K     { move-window-up; }
+  Mod+Shift+L     { move-column-right; }
+  Mod+Shift+Left  { move-column-left; }
+  Mod+Shift+Down  { move-window-down; }
+  Mod+Shift+Up    { move-window-up; }
+  Mod+Shift+Right { move-column-right; }
+
+  // WM — workspaces
+  Mod+WheelScrollUp         cooldown-ms=150 { focus-workspace-up; }
+  Mod+WheelScrollDown       cooldown-ms=150 { focus-workspace-down; }
+  Mod+Shift+WheelScrollUp                   { focus-column-left; }
+  Mod+Shift+WheelScrollDown                 { focus-column-right; }
+
+  Mod+1 { focus-workspace 1; }
+  Mod+2 { focus-workspace 2; }
+  Mod+3 { focus-workspace 3; }
+  Mod+4 { focus-workspace 4; }
+  Mod+5 { focus-workspace 5; }
+  Mod+6 { focus-workspace 6; }
+  Mod+7 { focus-workspace 7; }
+  Mod+8 { focus-workspace 8; }
+  Mod+9 { focus-workspace 9; }
+
+  Mod+Shift+1 { move-column-to-workspace 1; }
+  Mod+Shift+2 { move-column-to-workspace 2; }
+  Mod+Shift+3 { move-column-to-workspace 3; }
+  Mod+Shift+4 { move-column-to-workspace 4; }
+  Mod+Shift+5 { move-column-to-workspace 5; }
+  Mod+Shift+6 { move-column-to-workspace 6; }
+  Mod+Shift+7 { move-column-to-workspace 7; }
+  Mod+Shift+8 { move-column-to-workspace 8; }
+  Mod+Shift+9 { move-column-to-workspace 9; }
+
+  // WM — columns
+  Mod+BracketLeft  { consume-or-expel-window-left; }
+  Mod+BracketRight { consume-or-expel-window-right; }
+  Mod+Comma        { consume-window-into-column; }
+  Mod+Period       { expel-window-from-column; }
+
+  // WM — sizing
+  Mod+tab          { switch-preset-column-width; }
+  Mod+Shift+S      { switch-preset-window-height; }
+  Mod+0            { reset-window-height; }
+  Mod+F            { maximize-column; }
+  Mod+Ctrl+M       { fullscreen-window; }
+  Mod+Ctrl+F       { maximize-window-to-edges; }
+  Mod+Shift+F      { expand-column-to-available-width; }
+  Mod+Ctrl+C       { center-visible-columns; }
+  Mod+Minus        { set-column-width "-10%"; }
+  Mod+Equal        { set-column-width "+10%"; }
+  Mod+Shift+Minus  { set-window-height "-10%"; }
+  Mod+Shift+Equal  { set-window-height "+10%"; }
+}
+
+// ── Animations ────────────────────────────────────────────────────────────────
+
+animations {
+  slowdown 1.4
+
+  workspace-switch {
+    spring damping-ratio=0.5 stiffness=900 epsilon=0.0003
+  }
+
+  horizontal-view-movement {
+    spring damping-ratio=0.4 stiffness=800 epsilon=0.0001
+  }
+
+  window-movement {
+    spring damping-ratio=0.4 stiffness=800 epsilon=0.0001
+  }
+
+  config-notification-open-close {
+    spring damping-ratio=0.6 stiffness=800 epsilon=0.001
+  }
+
+  exit-confirmation-open-close {
+    spring damping-ratio=0.6 stiffness=500 epsilon=0.01
+  }
+
+  screenshot-ui-open {
+    duration-ms 200
+    curve "ease-out-quad"
+  }
+
+  overview-open-close {
+    spring damping-ratio=0.4 stiffness=900 epsilon=0.0001
+  }
+
+  recent-windows-close {
+    spring damping-ratio=0.4 stiffness=900 epsilon=0.001
+  }
+
+  window-open {
+    duration-ms 100
+    curve "linear"
+    custom-shader r"
+    const float PI = 3.14159265358979;
+
+    float easeInExpo(float t)  { return t == 0.0 ? 0.0 : pow(2.0, 10.0*(t-1.0)); }
+    float easeOutExpo(float t) { return t == 1.0 ? 1.0 : 1.0 - pow(2.0,-10.0*t); }
+    float easeInQuad(float t)  { return t*t; }
+    float easeOutQuad(float t) { return 1.0-(1.0-t)*(1.0-t); }
+    float easeInCubic(float t) { return t*t*t; }
+    float easeOutCubic(float t){ float f=t-1.0; return f*f*f+1.0; }
+    float easeOutQuart(float t){ float f=t-1.0; return 1.0-f*f*f*f; }
+
+    float saturate(float x) { return clamp(x,0.0,1.0); }
+
+    float remap(float t, float a, float b) {
+      return saturate((t-a)/(b-a));
+    }
+
+    vec2 scaleUV(vec2 uv, vec2 scale) {
+      return (uv-0.5)/scale + 0.5;
+    }
+
+    float centerGradient(float x) {
+      x *= 2.0;
+      return x < 1.0 ? x : 2.0-x;
+    }
+
+    float hash11(float n) { return fract(sin(n)*43758.5453); }
+
+    vec2 barrelDistort(vec2 uv, float strength) {
+      vec2 cc = uv - 0.5;
+      float dist = dot(cc,cc);
+      return uv + cc * dist * strength;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      vec2 uv = (niri_geo_to_tex * coords_geo).xy;
+      if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
+        return vec4(0.0);
+
+      float p  = niri_clamped_progress;
+      float px = remap(p, 0.05, 0.70);
+      float py = remap(p, 0.30, 1.00);
+
+      float scaleX = mix(0.07, 1.0, easeOutCubic(px));
+      float scaleY = mix(0.0,  1.0, easeInQuad(py));
+
+      float barrelStr = (1.0 - easeOutQuad(px)) * 0.25;
+      vec2 bdUV = barrelDistort(uv, barrelStr);
+      vec2 suv  = scaleUV(bdUV, vec2(scaleX, scaleY));
+
+      if (suv.x < 0.0 || suv.x > 1.0 || suv.y < 0.0 || suv.y > 1.0)
+        return vec4(0.0);
+
+      float edgeSoft = mix(0.06, 0.14, easeOutQuad(p));
+      float tb   = centerGradient(suv.y);
+      float lr   = centerGradient(suv.x);
+      float mask = smoothstep(0.0, edgeSoft, tb) * smoothstep(0.0, edgeSoft, lr);
+
+      float aberrAmt = (1.0 - easeOutQuad(px)) * 0.018;
+      vec4 wR = texture2D(niri_tex, scaleUV(bdUV + vec2( aberrAmt, 0.0), vec2(scaleX, scaleY)));
+      vec4 wG = texture2D(niri_tex, suv);
+      vec4 wB = texture2D(niri_tex, scaleUV(bdUV - vec2( aberrAmt, 0.0), vec2(scaleX, scaleY)));
+      vec4 wColor = vec4(wR.r, wG.g, wB.b, wG.a);
+
+      vec3 coldTint    = vec3(0.50, 0.78, 1.00);
+      vec3 warmTint    = vec3(0.90, 0.95, 1.00);
+      float tintFade   = easeOutQuad(remap(p, 0.0, 0.85));
+      float bloomBurst = (1.0 - easeOutExpo(remap(p, 0.0, 0.20))) * 0.55;
+      vec3 phosphorRGB = mix(coldTint, warmTint, tintFade) + bloomBurst;
+
+      float scanFlicker = 0.0;
+      if (py < 1.0) {
+        float scanLine = floor(suv.y * 80.0);
+        float flicker  = hash11(scanLine + floor(p * 60.0) * 97.3);
+        scanFlicker    = step(0.82, flicker) * (1.0 - easeOutQuad(py)) * 0.45;
+      }
+
+      float rgbFade  = 1.0 - easeOutQuad(remap(p, 0.40, 0.95));
+      float sweepPos = suv.x - p * 1.6 + 0.3;
+      float bandWidth = 0.22;
+      float band      = smoothstep(bandWidth, 0.0, abs(sweepPos)) * rgbFade * 0.55;
+      float hueAngle  = sweepPos * PI * 3.0 + p * PI * 4.0;
+      vec3 rgbSweep   = vec3(
+        0.5 + 0.5 * sin(hueAngle),
+        0.5 + 0.5 * sin(hueAngle + PI * 0.667),
+        0.5 + 0.5 * sin(hueAngle + PI * 1.333)
+      ) * band;
+
+      float alpha        = mask * easeOutQuad(p);
+      float contentBlend = easeInExpo(p);
+      vec4 phosphorLayer = vec4(phosphorRGB + scanFlicker + rgbSweep, alpha * wColor.a);
+      vec4 final         = mix(phosphorLayer, wColor, contentBlend);
+      final.rgb += rgbSweep * (1.0 - contentBlend);
+      final.a   *= mask;
+      return final;
+    }
+    "
+  }
+
+  window-close {
+    duration-ms 180
+    curve "ease-out-quad"
+  }
+
+  window-resize {
+    duration-ms 150
+    curve "linear"
+    custom-shader r"
+    float gh(float n) { return fract(sin(n) * 43758.5453); }
+
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    }
+
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      float a = hash(i);
+      float b = hash(i + vec2(1.0, 0.0));
+      float c = hash(i + vec2(0.0, 1.0));
+      float d = hash(i + vec2(1.0, 1.0));
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(a, b, u.x) +
+             (c - a) * u.y * (1.0 - u.x) +
+             (d - b) * u.y * u.x;
+    }
+
+    vec4 resize_color(vec3 coords_geo, vec3 size_geo) {
+      if (coords_geo.x < 0.0 || coords_geo.x > 1.0 ||
+          coords_geo.y < 0.0 || coords_geo.y > 1.0)
+        return vec4(0.0);
+
+      float p    = niri_clamped_progress;
+      vec2  uv   = coords_geo.xy;
+      float intensity = p * p * 0.5;
+
+      float tick = floor(p * 60.0) * 97.3;
+      float r1 = gh(tick * 1.13); float r2 = gh(tick * 2.37);
+      float r3 = gh(tick * 3.71); float r4 = gh(tick * 4.19);
+      float r5 = gh(tick * 5.53); float r6 = gh(tick * 6.91);
+
+      vec2 off_r = vec2(r1-0.5, r2-0.5) * intensity * 0.15;
+      vec2 off_g = vec2(r3-0.5, r4-0.5) * intensity * 0.15;
+      vec2 off_b = vec2(r5-0.5, r6-0.5) * intensity * 0.15;
+
+      float slice        = floor(uv.y * 20.0);
+      float slice_offset = (gh(slice + tick) - 0.5) * intensity * 0.08;
+      vec2  so           = vec2(slice_offset * 0.7, 0.0);
+
+      vec4 color;
+      color.r = texture2D(niri_tex_next, uv + off_r + so).r;
+      color.g = texture2D(niri_tex_next, uv + off_g + so).g;
+      color.b = texture2D(niri_tex_next, uv + off_b + so).b;
+      color.a = 1.0;
+
+      float big_glitch = step(0.86, gh(tick * 0.77));
+      vec2 shift  = vec2((gh(tick * 1.5) - 0.5) * 0.06 * big_glitch * intensity, 0.0);
+      vec4 shifted = texture2D(niri_tex_next, (size_geo * vec3(uv + shift, 1.0)).st);
+      color = mix(color, shifted, intensity * 0.4);
+
+      float scanline = 1.0 - sin(uv.y * size_geo.y * 3.14159) * 0.06 * intensity;
+      color.rgb *= scanline;
+      return color;
+    }
+    "
+  }
+}

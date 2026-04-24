@@ -1,0 +1,5 @@
+[mgr]
+prepend_keymap = [
+    { on = "<C-s>", run = "plugin kdeconnect-send",                              desc = "Send via KDE Connect" },
+    { on = "<C-w>", run = 'shell --orphan "bash $HOME/.config/Scripts/wallpaper.sh"', desc = "Change wallpaper" },
+]

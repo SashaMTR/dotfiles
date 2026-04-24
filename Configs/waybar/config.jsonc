@@ -1,0 +1,178 @@
+{
+    "layer": "top",
+    "position": "top",
+    "spacing": 6,
+    "reload_style_on_change": true,
+
+    // ── Bar layout ────────────────────────────────────────────────────────────
+
+    "modules-left": [
+        "custom/logo",
+        "custom/mpris",
+        "niri/workspaces"
+    ],
+
+    "modules-center": [
+        "clock"
+    ],
+
+    "modules-right": [
+        "custom/power",
+        "temperature",
+        "cpu",
+        "memory",
+        "disk",
+        "network",
+        "pulseaudio",
+        "backlight",
+        "battery"
+    ],
+
+    // ── Modules ───────────────────────────────────────────────────────────────
+
+    "custom/logo": {
+        "format": "󰣇   Niri",
+        "tooltip": false,
+        "on-click": "pkill rofi || rofi -show drun",
+        "on-click-right": "kitty"
+    },
+
+    "niri/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "active": "",
+            "default": ""
+        }
+    },
+
+    "clock": {
+        "interval": 1,
+        "format": "It's {:%H:%M:%S}",
+        "format-alt": "It's {:%H:%M:%S on %A, %d %B %Y}",
+        "tooltip": true,
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "on-click-right": "kitty -e bluetui"
+    },
+
+    "custom/mpris": {
+        "exec": "~/.config/Scripts/mpris.sh",
+        "interval": 2,
+        "return-type": "json",
+        "max-length": 15,
+        "tooltip": false,
+        "on-click": "playerctl play-pause"
+    },
+
+    "custom/power": {
+        "format": "",
+        "tooltip": true,
+        "tooltip-format": "Power menu",
+        "on-click": "pkill wlogout || wlogout",
+        "on-click-right": "pkill wlogout || wlogout",
+        "on-click-middle": "systemctl poweroff"
+    },
+
+    "temperature": {
+        "hwmon-path": "/sys/class/hwmon/hwmon4/temp1_input",
+        "critical-threshold": 80,
+        "warning-threshold": 60,
+        "format": "  {temperatureC}°C",
+        "tooltip": true,
+        "tooltip-format": "CPU temperature: {temperatureC}°C",
+        "on-click-right": "kitty sh -c 'sensors; read'"
+    },
+
+    "cpu": {
+        "interval": 1,
+        "format": "   {}%",
+        "format-alt": "   {avg_frequency} GHz",
+        "tooltip": true,
+        "on-click-right": "kitty -e btop"
+    },
+
+    "memory": {
+        "interval": 2,
+        "format": "    {percentage}%",
+        "format-alt": "    {used:0.1f}GiB / {total:0.1f}GiB",
+        "tooltip": true,
+        "tooltip-format": "{used} GiB RAM used out of {total} GiB\n{swapUsed} GiB SWAP used out of {swapTotal} GiB",
+        "on-click-right": "kitty -e btop"
+    },
+
+    "disk": {
+        "interval": 30,
+        "path": "/",
+        "format": "󰋊  {percentage_used}%",
+        "format-alt": "󰋊  {used} / {total}",
+        "tooltip": true,
+        "tooltip-format": "{used} used out of {total}\n{free} free ({percentage_free}%)",
+        "on-click-right": "kitty -e ncdu /"
+    },
+
+    "network": {
+        "interval": 1,
+        "format-wifi": "    {essid}",
+        "format-alt": " {bandwidthUpBytes}   {bandwidthDownBytes}",
+        "format-disconnected": "   No internet",
+        "tooltip": true,
+        "tooltip-format-wifi": "Connected to {essid} ({signalStrength}%)",
+        "on-click-right": "kitty -e nmtui"
+    },
+
+    "pulseaudio": {
+        "scroll-step": 1,
+        "reverse-scrolling": true,
+        "smooth-scrolling-threshold": 1.0,
+        "format": "{icon} {volume}%",
+        "format-bluetooth": " {icon} {volume}%",
+        "format-muted": "   Muted",
+        "format-icons": {
+            "default": [" ", "  ", "   "]
+        },
+        "tooltip": true,
+        "on-click": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%-",
+        "on-click-middle": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-click-right": "wpctl set-volume @DEFAULT_AUDIO_SINK@ -l 1.0 10%+",
+        "on-double-click-middle": "kitty -e pulsemixer"
+    },
+
+    "backlight": {
+        "reverse-scrolling": true,
+        "smooth-scrolling-threshold": 2.0,
+        "format": "{icon}   {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "tooltip": true,
+        "tooltip-format": "Current brightness is {percent} percent",
+        "on-scroll-up": "brightnessctl set 1%+",
+        "on-scroll-down": "brightnessctl set 1%-",
+        "on-click": "brightnessctl set 10%-",
+        "on-click-right": "brightnessctl set 10%+",
+        "on-click-middle": "bash $HOME/.config/Scripts/wallpaper.sh"
+    },
+
+    "battery": {
+        "interval": 1,
+        "states": {
+            "warning": 25,
+            "critical": 15
+        },
+        "format": "{icon}  {capacity}%",
+        "format-full": "{icon}  Battery full {capacity}%",
+        "format-charging": "  Charging {capacity}%",
+        "format-alt": "{icon}  Health ({health}%)  Charge cycles ({cycles})",
+        "format-icons": {
+            "default": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+        },
+        "tooltip": true,
+        "tooltip-format": "Battery level: {capacity}%\nPower usage: {power} watts\nDischarge in: {time}\nBattery health: {health}%\nCharge cycles: {cycles}",
+        "tooltip-format-charging": "Charging at {capacity}%\nPower usage: {power} watts\nFull charge in: {time}\nBattery health: {health}%\nCharge cycles: {cycles}",
+        "tooltip-format-critical": "Battery low: {capacity}%\nPower usage: {power} watts\nShutdown in: {time}\nConnect the charger immediately.",
+        "tooltip-format-warning": "Battery low: {capacity}%\nPower usage: {power} watts\nDischarge in: {time}\nConnect the charger soon.",
+        "on-click-right": "kitty sh -c 'upower -i /org/freedesktop/UPower/devices/battery_BAT0; read'",
+        "events": {
+            "on-discharging-warning": "notify-send 'Battery Low (25%)' 'Connect the charger soon'",
+            "on-discharging-critical": "notify-send 'Battery Critical (15%)' 'Connect the charger immediately'",
+            "on-charging-100": "notify-send 'Battery Full' 'Please unplug the charger'"
+        }
+    }
+}

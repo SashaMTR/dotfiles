@@ -1,0 +1,72 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+
+    "logo": {
+        "type": "kitty",
+        "source": "$HOME/.config/fastfetch/Arch.png",
+        "width": 28,
+        "height": 14,
+        "preserveAspectRatio": true,
+        "padding": {
+            "top": 1,
+            "left": 0,
+            "right": 4
+        }
+    },
+
+    "display": {
+        "separator": "  ➤  ",
+        "brightColor": true,
+        "constants": [
+            "─"
+        ],
+        "key": {
+            "type": "string",
+            "paddingLeft": 2
+        }
+    },
+
+    "general": {
+        "thread": true,
+        "processingTimeout": 5000
+    },
+
+    "modules": [
+        { "type": "title", "fqdn": false },
+        {
+            "type": "custom",
+            "format": "┌────────────────────────────── {#1}Hardware Flex{#} ──────────────────────────────┐"
+        },
+        { "type": "host",        "key": "  󰌢 Machine " },
+        { "type": "cpu",         "key": "   CPU     " },
+        { "type": "gpu",         "key": "  󰢮 GPU     ", "detectionMethod": "pci" },
+        { "type": "memory",      "key": "   RAM     " },
+        { "type": "disk",        "key": "  󰋊 Disk    ", "hideFolders": "/efi:/boot:/boot/*" },
+        { "type": "display",     "key": "  󰍹 Display " },
+        { "type": "battery",     "key": "   Battery " },
+        {
+            "type": "custom",
+            "format": "├────────────────────────────── {#1}Software Flex{#} ──────────────────────────────┤"
+        },
+        { "type": "os",          "key": "  󰣇 OS      " },
+        { "type": "kernel",      "key": "   Kernel  " },
+        { "type": "wm",          "key": "  󰖲 WM      " },
+        { "type": "theme",       "key": "  󰉼 Theme   " },
+        { "type": "icons",       "key": "  󰀻 Icons   " },
+        { "type": "font",        "key": "  󰃖 Font    " },
+        { "type": "cursor",      "key": "  󰆿 Cursor  " },
+        { "type": "shell",       "key": "   Shell   " },
+        { "type": "terminal",    "key": "   Terminal" },
+        { "type": "uptime",      "key": "  󰅐 Uptime  " },
+        { "type": "packages",    "key": "  󰏖 Packages" },
+        { "type": "localip",     "key": "  󰩟 Local IP", "defaultRouteOnly": true, "showIpv6": false },
+        {
+            "type": "custom",
+            "format": "└───────────────────────────────────────────────────────────────────────────┘"
+        },
+        {
+            "type": "custom",
+            "format": ""
+        }
+    ]
+}

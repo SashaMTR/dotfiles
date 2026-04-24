@@ -1,0 +1,41 @@
+# ── Général ───────────────────────────────────────────────────────────────────
+
+gui:
+  language: "fr"
+  timeFormat: "02/01/2006"
+  shortTimeFormat: "15:04"
+  theme:
+    activeBorderColor:
+      - "#61afef"
+      - bold
+    inactiveBorderColor:
+      - "#5c6370"
+    optionsTextColor:
+      - "#61afef"
+    selectedLineBgColor:
+      - "#2c313a"
+    selectedRangeBgColor:
+      - "#2c313a"
+    cherryPickedCommitBgColor:
+      - "#2c313a"
+    cherryPickedCommitFgColor:
+      - "#c678dd"
+    unstagedChangesColor:
+      - "#e06c75"
+    defaultFgColor:
+      - "#abb2bf"
+  authorColors:
+    "*": "#c678dd"
+
+# ── Pager (delta) ─────────────────────────────────────────────────────────────
+
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never --syntax-theme="OneHalfDark" --file-style=omit
+
+# ── Confirmation ──────────────────────────────────────────────────────────────
+
+promptToReturnFromSubprocess: false
+
+notARepository: "skip"

@@ -1,0 +1,51 @@
+* {
+    background-image: none;
+    box-shadow: none;
+    font-family: "Google Sans Flex";
+    font-size: 20px;
+    transition: all 0.2s ease-in-out;
+}
+
+window {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+button {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: none;
+    margin: 10px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25%;
+    border-radius: 20px;
+}
+
+button:focus, button:active, button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    outline-style: none;
+}
+
+#lock {
+    background-image: image(url("/home/sasha/.config/wlogout/icons/lock.png"));
+}
+
+#logout {
+    background-image: image(url("/home/sasha/.config/wlogout/icons/logout.png"));
+}
+
+#suspend {
+    background-image: image(url("/home/sasha/.config/wlogout/icons/sleep.png"));
+}
+
+#hibernate {
+    background-image: image(url("/home/sasha/.config/wlogout/icons/hibernate.png"));
+}
+
+#reboot {
+    background-image: image(url("/home/sasha/.config/wlogout/icons/restart.png"));
+}
+
+#shutdown {
+    background-image: image(url("/home/sasha/.config/wlogout/icons/power.png"));
+}
