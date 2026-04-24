@@ -2,7 +2,7 @@
 # install.sh — deploy dotfiles + install dependencies
 # usage: bash install.sh [--dry-run] [--deps-only] [--deploy-only]
 #
-# packages: pacman + AUR (yay)
+# packages: pacman + AUR (pikaur)
 
 set -euo pipefail
 
@@ -132,19 +132,47 @@ AUR_PKGS=(
     ncdu                   # disk usage TUI (yazi on-click)
 )
 
+install_pikaur() {
+    if command -v pikaur &>/dev/null; then
+        success "pikaur already installed"
+        return
+    fi
+
+    info "Installing pikaur..."
+    run sudo pacman -S --needed --noconfirm base-devel git
+
+    local tmp
+    tmp=$(mktemp -d)
+    run git clone https://aur.archlinux.org/pikaur.git "$tmp/pikaur"
+
+    if ! $DRY_RUN; then
+        (cd "$tmp/pikaur" && makepkg -si --noconfirm)
+    else
+        dry "cd $tmp/pikaur && makepkg -si --noconfirm"
+    fi
+
+    rm -rf "$tmp"
+    success "pikaur installed"
+
+    # Remove yay and paru if present
+    for aur_helper in yay paru; do
+        if command -v "$aur_helper" &>/dev/null; then
+            warn "$aur_helper found — removing in favor of pikaur"
+            run sudo pacman -Rns --noconfirm "$aur_helper" 2>/dev/null || \
+                warn "Could not remove $aur_helper automatically — remove manually"
+        fi
+    done
+}
+
 install_deps() {
+    install_pikaur
+
     info "Installing pacman packages..."
     run sudo pacman -S --needed --noconfirm "${PACMAN_PKGS[@]}"
     success "Pacman packages installed"
 
-    if ! command -v yay &>/dev/null; then
-        warn "yay not found — skipping AUR packages"
-        warn "Install yay manually then re-run with --deps-only"
-        return
-    fi
-
     info "Installing AUR packages..."
-    run yay -S --needed --noconfirm "${AUR_PKGS[@]}"
+    run pikaur -S --needed --noconfirm "${AUR_PKGS[@]}"
     success "AUR packages installed"
 }
 

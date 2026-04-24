@@ -18,9 +18,9 @@ alias d='cd ~/Downloads'
 
 # ── Arch ──────────────────────────────────────────────────────────────────────
 
-alias pacup='sudo timeshift --create --comments "Before update" --tags O && yay -Syu'
-alias paci='yay -S --needed'
-alias pacr='yay -Rns'
+alias pacup='sudo timeshift --create --comments "Before update" --tags O && pikaur -Syu'
+alias paci='pikaur -S --needed'
+alias pacr='pikaur -Rns'
 
 # ── System ────────────────────────────────────────────────────────────────────
 
