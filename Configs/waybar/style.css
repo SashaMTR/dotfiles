@@ -1,5 +1,5 @@
 * {
-    font-family: Google Sans Flex;
+    font-family: "Google Sans Flex", "JetBrainsMono Nerd Font", "Symbols Nerd Font";
     font-size: 16px;
     padding: 0px 2px;
 }
@@ -80,6 +80,7 @@ tooltip label {
 
 #custom-power {
     padding: 1px 16px 0px 12px;
+    font-size: 18px;
 }
 
 /* ── Hover ─────────────────────────────────────────────────────────────────── */
