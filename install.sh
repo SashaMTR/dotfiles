@@ -113,6 +113,17 @@ PACMAN_PKGS=(
     # KDE Connect
     kdeconnect
 
+    # Portals / Wayland compat
+    xdg-desktop-portal
+    xdg-desktop-portal-gtk
+    xdg-utils
+    qt5-wayland
+    qt6-wayland
+
+    # Polkit
+    polkit
+    polkit-gnome
+
     # SSH / Keyring
     lxqt-openssh-askpass
     gnome-keyring
@@ -134,6 +145,7 @@ AUR_PKGS=(
     telegram-desktop       # messaging (Mod+M)
     fractal                # Matrix client (Mod+F)
     localsend-bin          # local file sharing (Mod+Z)
+    waypaper               # GUI wallpaper picker (swww)
     cmus                   # music player (Mod+X)
 )
 
@@ -169,8 +181,345 @@ install_pikaur() {
     done
 }
 
+
+# ── Hardware detection ────────────────────────────────────────────────────────
+
+detect_hardware() {
+    echo ""
+    info "Detecting hardware..."
+
+    # ── CPU microcode ─────────────────────────────────────────────────────────
+
+    local cpu
+    cpu=$(grep -m1 "vendor_id" /proc/cpuinfo | awk '{print $3}')
+
+    case "$cpu" in
+        GenuineIntel)
+            info "Intel CPU detected → installing intel-ucode"
+            run sudo pacman -S --needed --noconfirm intel-ucode
+            ;;
+        AuthenticAMD)
+            info "AMD CPU detected → installing amd-ucode"
+            run sudo pacman -S --needed --noconfirm amd-ucode
+            ;;
+        *)
+            warn "Unknown CPU vendor: $cpu — skipping microcode"
+            ;;
+    esac
+
+    # ── GPU drivers + video acceleration ──────────────────────────────────────
+
+    local gpu_intel gpu_amd gpu_nvidia
+    gpu_intel=$(lspci 2>/dev/null | grep -i "VGA\|3D\|Display" | grep -i intel || true)
+    gpu_amd=$(lspci 2>/dev/null | grep -i "VGA\|3D\|Display" | grep -i "amd\|radeon\|amdgpu" || true)
+    gpu_nvidia=$(lspci 2>/dev/null | grep -i "VGA\|3D\|Display" | grep -i nvidia || true)
+
+    if [[ -n "$gpu_intel" ]]; then
+        info "Intel GPU detected → installing drivers + VA-API"
+        run sudo pacman -S --needed --noconfirm \
+            mesa \
+            vulkan-intel \
+            intel-media-driver \
+            libva-intel-driver \
+            libva-utils
+        success "Intel GPU drivers installed"
+    fi
+
+    if [[ -n "$gpu_amd" ]]; then
+        info "AMD GPU detected → installing drivers + VA-API"
+        run sudo pacman -S --needed --noconfirm \
+            mesa \
+            vulkan-radeon \
+            libva-mesa-driver \
+            mesa-vdpau \
+            libva-utils
+        success "AMD GPU drivers installed"
+    fi
+
+    if [[ -n "$gpu_nvidia" ]]; then
+        info "Nvidia GPU detected → installing drivers + NVENC"
+        run sudo pacman -S --needed --noconfirm \
+            nvidia-dkms \
+            nvidia-utils \
+            nvidia-settings \
+            libva-nvidia-driver \
+            cuda
+        # nvidia-vaapi-driver for VA-API support
+        run pikaur -S --needed --noconfirm nvidia-vaapi-driver
+        success "Nvidia GPU drivers installed"
+        warn "Reboot required after Nvidia driver install"
+    fi
+
+    if [[ -z "$gpu_intel" && -z "$gpu_amd" && -z "$gpu_nvidia" ]]; then
+        warn "No known GPU detected — skipping GPU drivers"
+    fi
+
+    # ── Hybrid Intel+Nvidia (laptop) ──────────────────────────────────────────
+
+    if [[ -n "$gpu_intel" && -n "$gpu_nvidia" ]]; then
+        info "Hybrid Intel+Nvidia detected → installing optimus-manager"
+        run pikaur -S --needed --noconfirm optimus-manager
+        warn "Configure optimus-manager after reboot"
+    fi
+
+    success "Hardware detection done"
+}
+
+
+# ── CachyOS setup ─────────────────────────────────────────────────────────────
+
+setup_cachyos() {
+    echo ""
+    info "Setting up CachyOS..."
+
+    # ── Repos ─────────────────────────────────────────────────────────────────
+
+    if grep -q "\[cachyos\]" /etc/pacman.conf 2>/dev/null; then
+        success "CachyOS repos already configured"
+    else
+        info "Adding CachyOS repositories..."
+
+        # Detect CPU instruction set support (v4 > v3 > baseline)
+        local cpu_level="baseline"
+        if grep -q "avx512" /proc/cpuinfo 2>/dev/null; then
+            cpu_level="v4"
+        elif grep -q "avx2" /proc/cpuinfo 2>/dev/null; then
+            cpu_level="v3"
+        fi
+        info "CPU level detected: $cpu_level"
+
+        run pikaur -S --needed --noconfirm cachyos-keyring cachyos-mirrorlist
+
+        if ! $DRY_RUN; then
+            if [[ "$cpu_level" == "v4" ]]; then
+                pikaur -S --needed --noconfirm cachyos-v4-mirrorlist
+                sudo tee -a /etc/pacman.conf > /dev/null << 'PACMAN'
+
+[cachyos-v4]
+Include = /etc/pacman.d/cachyos-v4-mirrorlist
+
+[cachyos-core-v4]
+Include = /etc/pacman.d/cachyos-v4-mirrorlist
+
+[cachyos-extra-v4]
+Include = /etc/pacman.d/cachyos-v4-mirrorlist
+
+[cachyos]
+Include = /etc/pacman.d/cachyos-mirrorlist
+PACMAN
+
+            elif [[ "$cpu_level" == "v3" ]]; then
+                pikaur -S --needed --noconfirm cachyos-v3-mirrorlist
+                sudo tee -a /etc/pacman.conf > /dev/null << 'PACMAN'
+
+[cachyos-v3]
+Include = /etc/pacman.d/cachyos-v3-mirrorlist
+
+[cachyos-core-v3]
+Include = /etc/pacman.d/cachyos-v3-mirrorlist
+
+[cachyos-extra-v3]
+Include = /etc/pacman.d/cachyos-v3-mirrorlist
+
+[cachyos]
+Include = /etc/pacman.d/cachyos-mirrorlist
+PACMAN
+
+            else
+                sudo tee -a /etc/pacman.conf > /dev/null << 'PACMAN'
+
+[cachyos]
+Include = /etc/pacman.d/cachyos-mirrorlist
+PACMAN
+            fi
+
+            sudo pacman -Sy
+        else
+            dry "append CachyOS $cpu_level repos to /etc/pacman.conf"
+        fi
+        success "CachyOS repos configured ($cpu_level)"
+    fi
+
+    # ── Packages ──────────────────────────────────────────────────────────────
+
+    info "Installing CachyOS packages..."
+    run sudo pacman -S --needed --noconfirm \
+        cachyos-settings \
+        ananicy-cpp \
+        bpftune \
+        cachyos-ananicy-rules \
+        scx-scheds
+    success "CachyOS packages installed"
+
+    # ── Services ──────────────────────────────────────────────────────────────
+
+    info "Enabling CachyOS services..."
+
+    local services=(
+        ananicy-cpp      # process priority daemon
+        bpftune          # auto kernel tuning
+        systemd-oomd     # out-of-memory daemon
+        bluetooth        # bluetooth
+        NetworkManager   # network
+        fstrim.timer     # SSD trim
+        systemd-timesyncd # NTP time sync
+    )
+
+    for svc in "${services[@]}"; do
+        if systemctl is-enabled "$svc" &>/dev/null; then
+            success "$svc already enabled"
+        else
+            run sudo systemctl enable --now "$svc"
+            success "$svc enabled"
+        fi
+    done
+
+    # ── Kernel scheduler (scx_bpfland) ───────────────────────────────────────
+
+    info "Configuring scx scheduler (bpfland)..."
+    if ! $DRY_RUN; then
+        sudo mkdir -p /etc/scx
+
+        # Create scx_loader service if it doesn't exist
+        sudo tee /etc/systemd/system/scx_loader.service > /dev/null << 'SYSTEMD'
+[Unit]
+Description=SCX Scheduler Loader (scx_bpfland)
+After=sysinit.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/scx_bpfland
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
+
+        sudo systemctl daemon-reload
+        sudo systemctl enable scx_loader
+    else
+        dry "create and enable scx_loader.service"
+    fi
+    success "scx_bpfland scheduler configured"
+
+    # ── Profile sync daemon ───────────────────────────────────────────────────
+
+    info "Installing profile-sync-daemon..."
+    run sudo pacman -S --needed --noconfirm profile-sync-daemon
+    run systemctl --user enable --now psd
+    success "profile-sync-daemon enabled"
+
+    success "CachyOS setup done"
+}
+
+
+# ── SELinux setup ─────────────────────────────────────────────────────────────
+
+setup_selinux() {
+    echo ""
+    info "Setting up SELinux..."
+
+    # ── Packages ──────────────────────────────────────────────────────────────
+
+    # ── GPG keys for SELinux packages ────────────────────────────────────────
+
+    info "Importing SELinux GPG keys..."
+    run gpg --keyserver keyserver.ubuntu.com --recv-keys 2BBED9CB1A68EF55
+    success "GPG keys imported"
+
+    info "Installing SELinux packages..."
+    run sudo pacman -S --needed --noconfirm \
+        audit
+
+    run pikaur -S --needed --noconfirm \
+        libselinux \
+        libsemanage \
+        libsepol \
+        policycoreutils \
+        checkpolicy \
+        setools \
+        selinux-refpolicy-arch-git
+
+    success "SELinux packages installed"
+
+    # ── Bootloader (kernel params) ────────────────────────────────────────────
+
+    info "Configuring kernel parameters for SELinux..."
+    if ! $DRY_RUN; then
+        local cmdline="/etc/kernel/cmdline"
+        if [[ -f "$cmdline" ]]; then
+            if ! grep -q "security=selinux" "$cmdline"; then
+                sudo sed -i 's/$/ security=selinux selinux=1 enforcing=0/' "$cmdline"
+                success "Kernel cmdline updated"
+            else
+                success "SELinux kernel params already set"
+            fi
+        else
+            warn "$cmdline not found — add manually: security=selinux selinux=1 enforcing=0"
+        fi
+    else
+        dry "append security=selinux selinux=1 enforcing=0 to /etc/kernel/cmdline"
+    fi
+
+    # ── PAM ───────────────────────────────────────────────────────────────────
+    # pam_selinux.so only available after reboot with SELinux active
+    # configured post-reboot automatically via a oneshot service
+
+    info "Creating post-reboot PAM configurator..."
+    if ! $DRY_RUN; then
+        sudo tee /etc/systemd/system/selinux-pam-setup.service > /dev/null << 'SYSTEMD'
+[Unit]
+Description=Configure PAM for SELinux (runs once after SELinux is active)
+After=local-fs.target
+ConditionPathExists=!/etc/selinux/.pam-configured
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "grep -q pam_selinux /etc/pam.d/login || echo session required pam_selinux.so >> /etc/pam.d/login && touch /etc/selinux/.pam-configured"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
+        sudo systemctl daemon-reload
+        sudo systemctl enable selinux-pam-setup
+    else
+        dry "create selinux-pam-setup.service"
+    fi
+
+    # ── Services ──────────────────────────────────────────────────────────────
+
+    info "Enabling audit daemon..."
+    run sudo systemctl enable --now auditd
+    success "auditd enabled"
+
+    # ── Mode: permissive ──────────────────────────────────────────────────────
+
+    info "Setting SELinux to permissive mode..."
+    if ! $DRY_RUN; then
+        sudo mkdir -p /etc/selinux
+        sudo tee /etc/selinux/config > /dev/null << 'SELINUX'
+# SELinux configuration
+# permissive = log only, no blocking (safe for initial setup)
+# enforcing  = full enforcement (switch after audit2allow review)
+SELINUXTYPE=refpolicy
+SELINUX=permissive
+SELINUX
+    else
+        dry "write /etc/selinux/config (permissive)"
+    fi
+
+    success "SELinux configured in permissive mode"
+    warn "Reboot required to activate SELinux"
+    warn "After reboot, check logs: journalctl -t setroubleshoot"
+    warn "When ready to enforce: setenforce 1 && sed -i 's/permissive/enforcing/' /etc/selinux/config"
+}
+
 install_deps() {
     install_pikaur
+    setup_cachyos
+    detect_hardware
+    setup_selinux
 
     info "Installing pacman packages..."
     run sudo pacman -S --needed --noconfirm "${PACMAN_PKGS[@]}"

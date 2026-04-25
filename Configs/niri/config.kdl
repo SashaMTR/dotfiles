@@ -177,9 +177,10 @@ layer-rule {
 
 spawn-sh-at-startup "waybar &"
 spawn-at-startup "swww-daemon"
-spawn-sh-at-startup "bash $HOME/.config/Scripts/wallpaper.sh"
+spawn-sh-at-startup "waypaper --restore"
 spawn-at-startup "kitty"
 spawn-at-startup "kdeconnect-indicator"
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 spawn-at-startup "mako"
 spawn-sh-at-startup "wl-paste --type text  --watch cliphist store"
 spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
@@ -192,7 +193,6 @@ binds {
   Mod+Return       { spawn "kitty"; }
   Mod+B            { spawn "librewolf"; }
   Mod+M            { spawn "Telegram"; }
-  Mod+A            { spawn "fractal"; }
   Mod+Z            { spawn "localsend"; }
   Mod+E            { spawn-sh "kitty -e yazi"; }
   Mod+Shift+B      { spawn-sh "kitty -e bluetui"; }
@@ -204,7 +204,7 @@ binds {
   Mod+C            { spawn-sh "pkill rofi || cliphist list | rofi -dmenu -display-columns 2 -theme ~/.config/rofi/clipboard.rasi | cliphist decode | wl-copy"; }
   Mod+P            { spawn-sh "pkill wlogout || wlogout"; }
   Mod+R            { spawn-sh "pkill waybar || waybar &"; }
-  Mod+W repeat=false { spawn-sh "bash $HOME/.config/Scripts/wallpaper.sh"; }
+  Mod+W repeat=false { spawn "waypaper"; }
 
   // Screenshots
   Mod+Ctrl+R       { spawn-sh "bash $HOME/.config/Scripts/screenshot.sh area"; }
